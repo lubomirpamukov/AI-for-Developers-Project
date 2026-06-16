@@ -10,6 +10,9 @@ Before starting any task, read:
 - `PROJECT_CONTEXT.md`
 - `.agents/workflow.md`
 - `.agents/reviewer.md`
+- `.agents/skills/vercel-react-best-practices/skills/react-native-skills/SKILL.md`
+
+For every frontend task, apply the React Native / Expo skill guidance from `.agents/skills/vercel-react-best-practices/skills/react-native-skills/SKILL.md`. If the task touches lists, animations, navigation, images, safe areas, native modules, fonts, state subscriptions, rendering, or monorepo dependency structure, also read the relevant detailed rule files under `.agents/skills/vercel-react-best-practices/skills/react-native-skills/rules/` before making changes.
 
 ## Responsibilities
 - Create focused, reusable React components.
@@ -20,6 +23,18 @@ Before starting any task, read:
 - Handle loading, error, empty, and success states.
 - Never store API keys in localStorage, sessionStorage, logs, snapshots, or source code.
 - Implement and execute relevant frontend tests before requesting review.
+
+## Backend Boundary
+The Frontend Expert must not directly edit backend files, backend configuration, backend tests, API route handlers, controllers, services, validators, prompt builders, provider integrations, environment handling, or server startup code.
+
+If a frontend task requires backend support, stop at the frontend boundary and hand off a precise backend request to `.agents/backend-expert.md`. The handoff must include:
+- The user-facing need.
+- The exact endpoint, request, response, validation, or error-shape change needed.
+- Any security or API-key handling constraints.
+- The frontend behavior that depends on the backend change.
+- Suggested backend tests or acceptance checks.
+
+After the Backend Expert completes and gets review approval, the Frontend Expert may continue with the frontend integration.
 
 ## React And SOLID Expectations
 - Prefer composition over large conditional components.
@@ -65,4 +80,3 @@ After finishing a frontend task:
 4. Request review from the project-local Reviewer using `.agents/reviewer.md`.
 
 If the Reviewer requests changes, apply them unless there is a strong technical reason not to. If you disagree with a recommendation, document the reason clearly and leave the decision for the human user.
-

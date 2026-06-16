@@ -25,6 +25,13 @@ Any agent working on QuizMaker must read:
 11. After approval, the assigned agent updates `PROJECT_CONTEXT.md` if the completed task changes important project knowledge.
 12. A task is complete only after Reviewer approval or documented human-approved disagreement.
 
+## Frontend Skill And Backend Boundary
+The Frontend Expert must read and apply `.agents/skills/vercel-react-best-practices/skills/react-native-skills/SKILL.md` for every frontend task. When a task touches a covered React Native / Expo category, the Frontend Expert must also read the relevant rule files under `.agents/skills/vercel-react-best-practices/skills/react-native-skills/rules/`.
+
+The Frontend Expert must not make backend changes directly. Backend files, backend configuration, backend tests, route/controller/service/validation/prompt/provider code, environment handling, and server startup code belong to the Backend Expert.
+
+When frontend work needs backend support, the Frontend Expert must hand off a precise request to `.agents/backend-expert.md`, including the needed endpoint or contract change, validation and security constraints, frontend dependency, and suggested backend acceptance checks. Frontend integration resumes after the Backend Expert completes the backend task and receives Reviewer approval.
+
 ## Project Context Updates
 After a task is successfully completed and approved, update `PROJECT_CONTEXT.md` when the task changes:
 - Architecture or module responsibilities.
