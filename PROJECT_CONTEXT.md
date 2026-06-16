@@ -31,7 +31,20 @@ This file is the primary project-local context document for future AI coding ses
 10. Frontend saves decks and quiz history in localStorage.
 
 ## Core API Contract
-Endpoint:
+Endpoints:
+
+```http
+GET /api/health
+```
+
+Success response:
+
+```ts
+{
+  status: "ok";
+  timestamp: string;
+}
+```
 
 ```http
 POST /api/generate-flashcards
@@ -47,6 +60,12 @@ Request body:
   apiKey?: string;
 }
 ```
+
+Validation rules:
+- `topic`: trim before validation; must be 1-120 characters.
+- `difficulty`: must be `beginner`, `intermediate`, or `advanced`.
+- `count`: must be an integer from 1-20.
+- `apiKey`: optional; use only for the current request and never store or log it.
 
 Success response:
 
@@ -68,9 +87,24 @@ Error response:
 ```ts
 {
   error: string;
-  details?: string;
+  code?: "VALIDATION_ERROR" | "MISSING_API_KEY" | "GENERATION_FAILED";
+  fields?: Record<string, string>;
 }
 ```
+
+Do not expose provider stack traces, raw Gemini errors, prompt contents, API keys, or other sensitive internals in API errors.
+
+## Shared Contracts
+Define shared TypeScript contracts during project scaffolding so frontend and backend use the same request, response, validation, and storage shapes.
+
+Shared contracts should include:
+- `Difficulty`
+- `Flashcard`
+- `FlashcardDeck`
+- `GenerateFlashcardsRequest`
+- `GenerateFlashcardsResponse`
+- `ApiErrorResponse`
+- Validation constants for topic length, difficulty values, and card count range.
 
 ## Security Rules
 - Prefer `GEMINI_API_KEY` from the backend `.env` file.
@@ -80,6 +114,48 @@ Error response:
 - Validate all backend input before calling Gemini.
 - Use safe, user-friendly error messages.
 - Keep server-side AI integration behind the Express API.
+
+## Local Storage Contract
+Use versioned localStorage keys and never store secrets.
+
+Keys:
+- `quizmaker:v1:decks`
+- `quizmaker:v1:quiz-history`
+- `quizmaker:v1:preferences`
+
+Deck record:
+
+```ts
+{
+  deckId: string;
+  topic: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  cards: {
+    id: string;
+    question: string;
+    answer: string;
+  }[];
+  createdAt: string;
+}
+```
+
+Quiz history record:
+
+```ts
+{
+  attemptId: string;
+  deckId: string;
+  score: number;
+  total: number;
+  answers: {
+    cardId: string;
+    correct: boolean;
+  }[];
+  completedAt: string;
+}
+```
+
+Preferences must contain only non-sensitive UI preferences. Do not store Gemini API keys or generated prompt data.
 
 ## Expected Screens
 - Flashcard generation form.
@@ -102,3 +178,12 @@ Error response:
 - Screenshot of a functioning quiz results screen.
 - Optional screenshot of passing tests, API response, or terminal logs.
 
+## Planned Task Order
+1. Scaffold the React, Express, and TypeScript project structure.
+2. Define shared TypeScript contracts for API requests, API responses, validation limits, and localStorage records.
+3. Implement backend health and flashcard generation endpoints.
+4. Run backend tests and request Reviewer approval.
+5. Implement frontend generation, deck preview, quiz, results, and localStorage flow.
+6. Run frontend tests and request Reviewer approval.
+7. Run full-system verification.
+8. Capture screenshots for assignment evidence.

@@ -10,9 +10,9 @@ Before starting any task, read:
 - `PROJECT_CONTEXT.md`
 - `.agents/workflow.md`
 - `.agents/reviewer.md`
-- `.agents/skills/vercel-react-best-practices/skills/react-native-skills/SKILL.md`
+- `.agents/skills/vercel-react-best-practices/skills/react-best-practices/SKILL.md`
 
-For every frontend task, apply the React Native / Expo skill guidance from `.agents/skills/vercel-react-best-practices/skills/react-native-skills/SKILL.md`. If the task touches lists, animations, navigation, images, safe areas, native modules, fonts, state subscriptions, rendering, or monorepo dependency structure, also read the relevant detailed rule files under `.agents/skills/vercel-react-best-practices/skills/react-native-skills/rules/` before making changes.
+For every frontend task, apply the React skill guidance from `.agents/skills/vercel-react-best-practices/skills/react-best-practices/SKILL.md`. If the task touches data fetching, localStorage, rendering performance, re-render behavior, bundle size, or JavaScript performance, also read the relevant detailed rule files under `.agents/skills/vercel-react-best-practices/skills/react-best-practices/rules/` before making changes.
 
 ## Responsibilities
 - Create focused, reusable React components.
@@ -20,6 +20,7 @@ For every frontend task, apply the React Native / Expo skill guidance from `.age
 - Separate UI rendering, state management, API calls, validation, and localStorage logic.
 - Use CSS Modules for component styling.
 - Validate user input before calling the backend.
+- Mirror backend validation limits: topic must be 1-120 trimmed characters, difficulty must be `beginner`, `intermediate`, or `advanced`, and count must be an integer from 1-20.
 - Handle loading, error, empty, and success states.
 - Never store API keys in localStorage, sessionStorage, logs, snapshots, or source code.
 - Implement and execute relevant frontend tests before requesting review.
@@ -41,6 +42,7 @@ After the Backend Expert completes and gets review approval, the Frontend Expert
 - Extract reusable logic into custom hooks when it has a clear purpose.
 - Keep API client code outside UI components.
 - Keep localStorage access behind a small storage utility or hook.
+- Store local data under versioned keys using the `quizmaker:v1:` prefix.
 - Avoid prop drilling when a small local state boundary is enough.
 - Avoid premature global state.
 - Use clear TypeScript types for props, API responses, quiz state, and storage data.
@@ -62,6 +64,8 @@ Use Vitest and React Testing Library where applicable.
 
 Frontend work must include tests for:
 - Form validation.
+- Topic length validation.
+- Count range and integer validation.
 - Successful generation flow with mocked API.
 - Loading state.
 - Error state.
@@ -69,6 +73,8 @@ Frontend work must include tests for:
 - Quiz answer reveal behavior.
 - Quiz score calculation.
 - localStorage save and load behavior.
+- Versioned `quizmaker:v1:` localStorage keys.
+- API key values never persisted to storage.
 
 Tests must be executed before review. Include the exact test command and result summary in the handoff to the Reviewer.
 

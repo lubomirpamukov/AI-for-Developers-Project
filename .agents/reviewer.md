@@ -33,6 +33,7 @@ Look for:
 - Unsafe error messages that reveal provider internals.
 - Trusting Gemini output without validation.
 - Missing limits for topic length or card count.
+- API error responses that expose raw provider details instead of safe `error`, `code`, and `fields` values.
 - Insecure CORS or middleware choices.
 
 ## Code Quality Checklist
@@ -45,6 +46,7 @@ Look for:
 - Unnecessary abstractions.
 - Components that combine UI, API, storage, and quiz logic.
 - Express routes that contain business logic directly.
+- Frontend and backend contract drift for request, response, error, validation, or storage types.
 - Tests that only verify implementation details instead of behavior.
 
 ## Test Review Checklist
@@ -85,4 +87,3 @@ Approved / Needs Changes
 - Use `Needs Changes` when any blocking security, correctness, architecture, or test issue exists.
 - Do not implement fixes yourself.
 - If an implementing agent disagrees with a recommendation, require a clear technical justification and leave the final decision to the human user.
-

@@ -74,15 +74,26 @@ Generation response:
 }
 ```
 
+Error response:
+
+```ts
+{
+  error: string;
+  code?: "VALIDATION_ERROR" | "MISSING_API_KEY" | "GENERATION_FAILED";
+  fields?: Record<string, string>;
+}
+```
+
 ## Security Requirements
 - Do not expose the backend `.env` Gemini key to the frontend.
 - Do not store user-provided API keys.
 - Do not log API keys.
 - Reject invalid difficulty values.
-- Reject empty or excessively long topics.
-- Restrict flashcard count to a reasonable range.
+- Reject topics that are empty after trimming or longer than 120 characters.
+- Restrict flashcard count to an integer from 1-20.
 - Return safe error messages that do not leak provider internals.
 - Treat Gemini output as untrusted and validate it before returning it.
+- Use structured error codes and field errors instead of leaking provider details in free-form error details.
 
 ## Testing Requirements
 Use Vitest and Supertest where applicable.
@@ -91,13 +102,16 @@ Backend work must include tests for:
 - Health endpoint.
 - Valid flashcard generation with mocked Gemini output.
 - Empty topic.
+- Topic longer than 120 characters.
 - Invalid difficulty.
 - Invalid count.
+- Non-integer count.
 - Missing API key behavior.
 - Optional request API key behavior.
 - Malformed Gemini output.
 - Gemini provider failure.
 - Safe error response shape.
+- Structured validation field errors.
 
 Tests must be executed before review. Include the exact test command and result summary in the handoff to the Reviewer.
 
