@@ -1,0 +1,61 @@
+.shell {
+  min-height: 100vh;
+  background: #f7f7f4;
+  color: #191919;
+  padding: 48px 20px;
+}
+
+.workspace {
+  display: grid;
+  gap: 24px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.header {
+  display: grid;
+  gap: 8px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #48624d;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 0;
+  max-width: 12ch;
+  font-size: 2.75rem;
+  line-height: 1.05;
+}
+
+.preview {
+  border: 1px solid #d8d8d0;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 20px;
+}
+
+.preview h2,
+.preview p {
+  margin: 0;
+}
+
+.preview p {
+  margin-top: 8px;
+  color: #55554f;
+}
+
+@media (max-width: 560px) {
+  .shell {
+    padding: 28px 14px;
+  }
+
+  .header h1 {
+    max-width: 100%;
+    font-size: 2rem;
+  }
+}

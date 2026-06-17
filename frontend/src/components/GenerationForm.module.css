@@ -1,0 +1,68 @@
+.form {
+  display: grid;
+  gap: 18px;
+  border: 1px solid #d8d8d0;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 20px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field label {
+  font-size: 0.925rem;
+  font-weight: 700;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #b9bab2;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #191919;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.field input[aria-invalid="true"] {
+  border-color: #a53b2a;
+}
+
+.field p {
+  margin: 0;
+  color: #8a2d20;
+  font-size: 0.875rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  gap: 16px;
+}
+
+.form button {
+  justify-self: start;
+  border: 0;
+  border-radius: 6px;
+  background: #24563b;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 11px 16px;
+}
+
+.form button:hover {
+  background: #1d472f;
+}
+
+@media (max-width: 560px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

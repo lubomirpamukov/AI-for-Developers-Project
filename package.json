@@ -1,0 +1,20 @@
+{
+  "name": "quizmaker",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run build --workspace @quizmaker/shared && npm run dev --workspace @quizmaker/frontend",
+    "dev:backend": "npm run build --workspace @quizmaker/shared && npm run dev --workspace @quizmaker/backend",
+    "build": "npm run build --workspace @quizmaker/shared && npm run build --workspace @quizmaker/backend && npm run build --workspace @quizmaker/frontend",
+    "test": "npm run test --workspace @quizmaker/shared && npm run test --workspace @quizmaker/backend && npm run test --workspace @quizmaker/frontend",
+    "typecheck": "npm run typecheck --workspace @quizmaker/shared && npm run typecheck --workspace @quizmaker/backend && npm run typecheck --workspace @quizmaker/frontend"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  }
+}
