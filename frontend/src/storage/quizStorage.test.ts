@@ -30,11 +30,13 @@ describe("quizStorage", () => {
   });
 
   it("does not persist API key-shaped preferences", () => {
-    savePreferences({ lastDifficulty: "advanced", lastCount: 10 });
+    savePreferences({ lastDifficulty: "advanced", lastCount: 10, lastProvider: "openai" });
 
     const storedPreferences = localStorage.getItem(STORAGE_KEYS.preferences);
 
-    expect(storedPreferences).toBe(JSON.stringify({ lastDifficulty: "advanced", lastCount: 10 }));
+    expect(storedPreferences).toBe(
+      JSON.stringify({ lastDifficulty: "advanced", lastCount: 10, lastProvider: "openai" })
+    );
     expect(storedPreferences).not.toContain("apiKey");
   });
 

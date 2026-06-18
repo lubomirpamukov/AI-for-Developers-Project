@@ -1,14 +1,9 @@
 import { useMemo, useState } from "react";
 import type { GenerateFlashcardsRequest } from "@quizmaker/shared";
 import { GenerationForm } from "./components/GenerationForm.js";
+import { loadPreferences, savePreferences } from "./storage/quizStorage.js";
 import memoryAtelierHero from "./assets/memory-atelier-hero.webp";
 import styles from "./App.module.css";
-
-const initialRequest: GenerateFlashcardsRequest = {
-  topic: "",
-  difficulty: "beginner",
-  count: 5
-};
 
 const learningMoments = [
   "Generate",
@@ -18,6 +13,16 @@ const learningMoments = [
 ] as const;
 
 export function App() {
+  const [initialRequest] = useState<GenerateFlashcardsRequest>(() => {
+    const preferences = loadPreferences();
+
+    return {
+      topic: "",
+      difficulty: preferences.lastDifficulty ?? "beginner",
+      count: preferences.lastCount ?? 5,
+      provider: preferences.lastProvider ?? "gemini"
+    };
+  });
   const [lastRequest, setLastRequest] = useState<GenerateFlashcardsRequest | null>(null);
 
   const previewTitle = useMemo(() => {
@@ -25,11 +30,16 @@ export function App() {
       return "No deck requested yet";
     }
 
-    return `${lastRequest.count} ${lastRequest.difficulty} cards about ${lastRequest.topic}`;
+    return `${formatProviderName(lastRequest.provider)} will shape ${lastRequest.count} ${lastRequest.difficulty} cards about ${lastRequest.topic}`;
   }, [lastRequest]);
 
   function handleGenerate(request: GenerateFlashcardsRequest) {
     setLastRequest(request);
+    savePreferences({
+      lastDifficulty: request.difficulty,
+      lastCount: request.count,
+      lastProvider: request.provider
+    });
   }
 
   return (
@@ -70,4 +80,8 @@ export function App() {
       </section>
     </main>
   );
+}
+
+function formatProviderName(provider: GenerateFlashcardsRequest["provider"]) {
+  return provider === "openai" ? "OpenAI" : "Gemini";
 }

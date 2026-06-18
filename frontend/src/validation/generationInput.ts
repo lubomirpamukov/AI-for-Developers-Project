@@ -1,6 +1,8 @@
 import {
+  API_PROVIDERS,
   DIFFICULTIES,
   VALIDATION_LIMITS,
+  type ApiProvider,
   type Difficulty,
   type GenerateFlashcardsRequest
 } from "@quizmaker/shared";
@@ -9,6 +11,7 @@ interface FormInput {
   topic: string;
   difficulty: string;
   count: string;
+  provider: string;
   apiKey: string;
 }
 
@@ -31,6 +34,10 @@ export function validateGenerationInput(input: FormInput): ValidationResult {
     fields.difficulty = "Difficulty must be beginner, intermediate, or advanced.";
   }
 
+  if (!isApiProvider(input.provider)) {
+    fields.provider = "Provider must be Gemini or OpenAI.";
+  }
+
   if (!Number.isInteger(parsedCount)) {
     fields.count = "Count must be a whole number.";
   } else if (
@@ -40,7 +47,11 @@ export function validateGenerationInput(input: FormInput): ValidationResult {
     fields.count = `Count must be between ${VALIDATION_LIMITS.countMin} and ${VALIDATION_LIMITS.countMax}.`;
   }
 
-  if (Object.keys(fields).length > 0 || !isDifficulty(input.difficulty)) {
+  if (
+    Object.keys(fields).length > 0 ||
+    !isDifficulty(input.difficulty) ||
+    !isApiProvider(input.provider)
+  ) {
     return { ok: false, fields };
   }
 
@@ -50,6 +61,7 @@ export function validateGenerationInput(input: FormInput): ValidationResult {
       topic,
       difficulty: input.difficulty,
       count: parsedCount,
+      provider: input.provider,
       apiKey: input.apiKey.trim() || undefined
     }
   };
@@ -57,4 +69,8 @@ export function validateGenerationInput(input: FormInput): ValidationResult {
 
 function isDifficulty(value: string): value is Difficulty {
   return DIFFICULTIES.includes(value as Difficulty);
+}
+
+function isApiProvider(value: string): value is ApiProvider {
+  return API_PROVIDERS.includes(value as ApiProvider);
 }

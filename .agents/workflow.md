@@ -66,7 +66,7 @@ The Backend Expert must provide:
 - Files changed.
 - Endpoints added or changed.
 - Validation behavior.
-- Gemini integration behavior.
+- Provider integration behavior.
 - API key handling behavior.
 - Tests added or updated.
 - Exact test command executed.

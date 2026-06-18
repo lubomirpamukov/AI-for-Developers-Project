@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import type { GenerateFlashcardsRequest } from "@quizmaker/shared";
-import { DIFFICULTIES } from "@quizmaker/shared";
+import { API_PROVIDERS, DIFFICULTIES } from "@quizmaker/shared";
 import { validateGenerationInput } from "../validation/generationInput.js";
 import styles from "./GenerationForm.module.css";
 
@@ -13,10 +13,12 @@ export function GenerationForm({ initialValue, onSubmit }: GenerationFormProps) 
   const topicId = useId();
   const difficultyId = useId();
   const countId = useId();
+  const providerId = useId();
   const apiKeyId = useId();
   const [topic, setTopic] = useState(initialValue.topic);
   const [difficulty, setDifficulty] = useState(initialValue.difficulty);
   const [count, setCount] = useState(String(initialValue.count));
+  const [provider, setProvider] = useState(initialValue.provider);
   const [apiKey, setApiKey] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
 
@@ -27,6 +29,7 @@ export function GenerationForm({ initialValue, onSubmit }: GenerationFormProps) 
       topic,
       difficulty,
       count,
+      provider,
       apiKey
     });
 
@@ -74,6 +77,29 @@ export function GenerationForm({ initialValue, onSubmit }: GenerationFormProps) 
         </div>
 
         <div className={styles.field}>
+          <label htmlFor={providerId}>Provider</label>
+          <select
+            id={providerId}
+            name="provider"
+            value={provider}
+            onChange={(event) =>
+              setProvider(event.target.value as GenerateFlashcardsRequest["provider"])
+            }
+            aria-invalid={Boolean(fields.provider)}
+            aria-describedby={fields.provider ? `${providerId}-error` : undefined}
+          >
+            {API_PROVIDERS.map((option) => (
+              <option key={option} value={option}>
+                {formatProviderName(option)}
+              </option>
+            ))}
+          </select>
+          {fields.provider ? <p id={`${providerId}-error`}>{fields.provider}</p> : null}
+        </div>
+      </div>
+
+      <div className={styles.row}>
+        <div className={styles.field}>
           <label htmlFor={countId}>Cards</label>
           <input
             id={countId}
@@ -89,7 +115,7 @@ export function GenerationForm({ initialValue, onSubmit }: GenerationFormProps) 
       </div>
 
       <div className={styles.field}>
-        <label htmlFor={apiKeyId}>One-request API key</label>
+        <label htmlFor={apiKeyId}>{formatProviderName(provider)} one-request API key</label>
         <input
           id={apiKeyId}
           name="apiKey"
@@ -103,4 +129,8 @@ export function GenerationForm({ initialValue, onSubmit }: GenerationFormProps) 
       <button type="submit">Prepare deck request</button>
     </form>
   );
+}
+
+function formatProviderName(provider: GenerateFlashcardsRequest["provider"]) {
+  return provider === "openai" ? "OpenAI" : "Gemini";
 }

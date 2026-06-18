@@ -31,7 +31,7 @@ Look for:
 - Backend `.env` secrets leaked to the client.
 - Missing backend input validation.
 - Unsafe error messages that reveal provider internals.
-- Trusting Gemini output without validation.
+- Trusting provider output without validation.
 - Missing limits for topic length or card count.
 - API error responses that expose raw provider details instead of safe `error`, `code`, and `fields` values.
 - Insecure CORS or middleware choices.

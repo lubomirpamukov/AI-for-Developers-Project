@@ -72,7 +72,8 @@ After the Backend Expert completes and gets review approval, the Frontend Expert
 
 ## Expected UI Areas
 - Flashcard generation form.
-- Optional one-request Gemini API key input.
+- Provider dropdown for Gemini or OpenAI.
+- Optional one-request provider API key input.
 - Generated deck preview.
 - Quiz card question view.
 - Answer reveal view.

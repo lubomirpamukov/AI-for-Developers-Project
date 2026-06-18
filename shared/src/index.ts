@@ -2,6 +2,10 @@ export const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
 
 export type Difficulty = (typeof DIFFICULTIES)[number];
 
+export const API_PROVIDERS = ["gemini", "openai"] as const;
+
+export type ApiProvider = (typeof API_PROVIDERS)[number];
+
 export const VALIDATION_LIMITS = {
   topicMinLength: 1,
   topicMaxLength: 120,
@@ -36,6 +40,7 @@ export interface GenerateFlashcardsRequest {
   topic: string;
   difficulty: Difficulty;
   count: number;
+  provider: ApiProvider;
   apiKey?: string;
 }
 
@@ -74,4 +79,5 @@ export interface QuizHistoryRecord {
 export interface UserPreferences {
   lastDifficulty?: Difficulty;
   lastCount?: number;
+  lastProvider?: ApiProvider;
 }

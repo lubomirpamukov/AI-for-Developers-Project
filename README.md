@@ -18,4 +18,4 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-The backend keeps Gemini integration behind the Express API. Do not store Gemini API keys in frontend storage, logs, screenshots, or test snapshots.
+The backend keeps Gemini and OpenAI integration behind the Express API. Use `GEMINI_API_KEY` or `OPENAI_API_KEY` for server-side provider credentials, with optional one-request user keys allowed by the API contract. Do not store provider API keys in frontend storage, logs, screenshots, or test snapshots.

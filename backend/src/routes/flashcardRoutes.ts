@@ -1,6 +1,14 @@
 import { Router } from "express";
-import { generateFlashcards } from "../controllers/flashcardController.js";
+import { createGenerateFlashcardsController } from "../controllers/flashcardController.js";
+import type { FlashcardGenerator } from "../services/flashcardProviderService.js";
 
-export const flashcardRouter = Router();
+export function createFlashcardRouter(generator: FlashcardGenerator) {
+  const flashcardRouter = Router();
 
-flashcardRouter.post("/generate-flashcards", generateFlashcards);
+  flashcardRouter.post(
+    "/generate-flashcards",
+    createGenerateFlashcardsController(generator)
+  );
+
+  return flashcardRouter;
+}

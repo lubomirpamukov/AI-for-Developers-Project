@@ -23,8 +23,8 @@ Use the `nodejs-express-server` skill for Express server design, middleware chai
 - Validate all request bodies before processing.
 - Keep route handlers thin.
 - Separate route, controller, service, validation, and prompt-building logic.
-- Integrate securely with Google Gemini through `@google/genai`.
-- Prefer `process.env.GEMINI_API_KEY`.
+- Integrate securely with Google Gemini through `@google/genai` and OpenAI through the Responses API.
+- Prefer `process.env.GEMINI_API_KEY` or `process.env.OPENAI_API_KEY` for the selected provider.
 - Allow an optional request-provided API key only for one request in demo mode.
 - Never log API keys or sensitive request data.
 - Implement and execute relevant backend tests before requesting review.
@@ -55,6 +55,7 @@ Generation request:
   topic: string;
   difficulty: "beginner" | "intermediate" | "advanced";
   count: number;
+  provider: "gemini" | "openai";
   apiKey?: string;
 }
 ```
@@ -89,10 +90,11 @@ Error response:
 - Do not store user-provided API keys.
 - Do not log API keys.
 - Reject invalid difficulty values.
+- Reject invalid provider values.
 - Reject topics that are empty after trimming or longer than 120 characters.
 - Restrict flashcard count to an integer from 1-20.
 - Return safe error messages that do not leak provider internals.
-- Treat Gemini output as untrusted and validate it before returning it.
+- Treat provider output as untrusted and validate it before returning it.
 - Use structured error codes and field errors instead of leaking provider details in free-form error details.
 
 ## Testing Requirements
@@ -101,6 +103,7 @@ Use Vitest and Supertest where applicable.
 Backend work must include tests for:
 - Health endpoint.
 - Valid flashcard generation with mocked Gemini output.
+- Valid flashcard generation with mocked OpenAI output.
 - Empty topic.
 - Topic longer than 120 characters.
 - Invalid difficulty.
@@ -110,6 +113,8 @@ Backend work must include tests for:
 - Optional request API key behavior.
 - Malformed Gemini output.
 - Gemini provider failure.
+- Malformed OpenAI output.
+- OpenAI provider failure.
 - Safe error response shape.
 - Structured validation field errors.
 

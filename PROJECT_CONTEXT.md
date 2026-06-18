@@ -1,7 +1,7 @@
 # QuizMaker Project Context
 
 ## Purpose
-QuizMaker is a small full-stack learning app. Users provide a topic, difficulty level, and desired number of flashcards. The backend uses Google Gemini to generate flashcards, and the frontend lets users review the generated deck, quiz themselves, and save learning progress locally.
+QuizMaker is a small full-stack learning app. Users provide a topic, difficulty level, desired number of flashcards, and AI provider. The backend uses the selected provider to generate flashcards, and the frontend lets users review the generated deck, quiz themselves, and save learning progress locally.
 
 This file is the primary project-local context document for future AI coding sessions. Any AI agent working on QuizMaker must read this file before making implementation decisions.
 
@@ -14,21 +14,22 @@ This file is the primary project-local context document for future AI coding ses
 ## Tech Stack
 - Frontend: React, TypeScript, Vite, CSS Modules.
 - Backend: Node.js, Express, TypeScript.
-- AI provider: Google Gemini API through `@google/genai`.
+- AI providers: Google Gemini API through `@google/genai`, plus OpenAI through the Responses API.
 - Storage: browser localStorage for decks, quiz attempts, scores, and non-sensitive preferences.
 - Testing: Vitest, React Testing Library, and Supertest.
 
 ## Core User Flow
 1. User enters a topic, difficulty, and number of flashcards.
-2. User optionally provides a Gemini API key for one request if the backend `.env` key is unavailable.
-3. Frontend sends the generation request to the backend.
-4. Backend validates input and calls Gemini.
-5. Backend returns a structured flashcard deck.
-6. Frontend displays the deck preview.
-7. User starts a quiz.
-8. User reveals answers and marks each card correct or incorrect.
-9. Frontend shows final quiz results.
-10. Frontend saves decks and quiz history in localStorage.
+2. User chooses Gemini or OpenAI as the generation provider.
+3. User optionally provides a provider API key for one request if the backend `.env` key is unavailable.
+4. Frontend sends the generation request to the backend.
+5. Backend validates input and calls the selected provider.
+6. Backend returns a structured flashcard deck.
+7. Frontend displays the deck preview.
+8. User starts a quiz.
+9. User reveals answers and marks each card correct or incorrect.
+10. Frontend shows final quiz results.
+11. Frontend saves decks and quiz history in localStorage.
 
 ## Core API Contract
 Endpoints:
@@ -57,6 +58,7 @@ Request body:
   topic: string;
   difficulty: "beginner" | "intermediate" | "advanced";
   count: number;
+  provider: "gemini" | "openai";
   apiKey?: string;
 }
 ```
@@ -65,6 +67,7 @@ Validation rules:
 - `topic`: trim before validation; must be 1-120 characters.
 - `difficulty`: must be `beginner`, `intermediate`, or `advanced`.
 - `count`: must be an integer from 1-20.
+- `provider`: must be `gemini` or `openai`.
 - `apiKey`: optional; use only for the current request and never store or log it.
 
 Success response:
@@ -92,13 +95,14 @@ Error response:
 }
 ```
 
-Do not expose provider stack traces, raw Gemini errors, prompt contents, API keys, or other sensitive internals in API errors.
+Do not expose provider stack traces, raw Gemini/OpenAI errors, prompt contents, API keys, or other sensitive internals in API errors.
 
 ## Shared Contracts
 Define shared TypeScript contracts during project scaffolding so frontend and backend use the same request, response, validation, and storage shapes.
 
 Shared contracts should include:
 - `Difficulty`
+- `ApiProvider`
 - `Flashcard`
 - `FlashcardDeck`
 - `GenerateFlashcardsRequest`
@@ -107,11 +111,12 @@ Shared contracts should include:
 - Validation constants for topic length, difficulty values, and card count range.
 
 ## Security Rules
-- Prefer `GEMINI_API_KEY` from the backend `.env` file.
+- Prefer `GEMINI_API_KEY` or `OPENAI_API_KEY` from the backend `.env` file for the selected provider.
+- `OPENAI_MODEL` configures the OpenAI model and defaults to `gpt-5.5`.
 - Optional user-provided API keys are allowed only for one request.
 - Never store API keys in localStorage, sessionStorage, source code, logs, screenshots, or test snapshots.
 - Never log sensitive request data.
-- Validate all backend input before calling Gemini.
+- Validate all backend input before calling the selected provider.
 - Use safe, user-friendly error messages.
 - Keep server-side AI integration behind the Express API.
 
@@ -155,7 +160,8 @@ Quiz history record:
 }
 ```
 
-Preferences must contain only non-sensitive UI preferences. Do not store Gemini API keys or generated prompt data.
+Preferences must contain only non-sensitive UI preferences. Do not store provider API keys or generated prompt data.
+Provider preference is non-sensitive and may be stored as `lastProvider`; API keys must never be stored.
 
 ## Expected Screens
 - Flashcard generation form.

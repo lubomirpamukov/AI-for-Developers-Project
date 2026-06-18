@@ -1,5 +1,16 @@
-import type { QuizHistoryRecord, StoredFlashcardDeck, UserPreferences } from "@quizmaker/shared";
+import type {
+  ApiProvider,
+  Difficulty,
+  QuizHistoryRecord,
+  StoredFlashcardDeck
+} from "@quizmaker/shared";
 import { STORAGE_KEYS } from "@quizmaker/shared";
+
+export interface UserPreferences {
+  lastDifficulty?: Difficulty;
+  lastCount?: number;
+  lastProvider?: ApiProvider;
+}
 
 export function loadStoredDecks(): StoredFlashcardDeck[] {
   return readJsonArray<StoredFlashcardDeck>(STORAGE_KEYS.decks);
