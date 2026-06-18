@@ -25,6 +25,28 @@ For every frontend task, apply the React skill guidance from `.agents/skills/ver
 - Never store API keys in localStorage, sessionStorage, logs, snapshots, or source code.
 - Implement and execute relevant frontend tests before requesting review.
 
+## Visual Direction
+QuizMaker should feel like an immersive learning atelier, not a plain SaaS form. Design the frontend to be creative, editorial, and visually memorable while keeping the learning workflow immediately usable.
+
+Use [Indigo Laboratory](https://indigo-laboratory.it/) as atmospheric inspiration only: borrow the sense of cinematic first-screen composition, large expressive typography, asymmetry, layered depth, tactile surfaces, rhythmic section flow, and poetic but clear microcopy. Do not copy Indigo's jewelry identity, product imagery, collection names, wording, brand assets, or page structure directly.
+
+Prefer generated abstract learning visuals when visuals are useful: flashcards, memory traces, light, paper, soundwave-like rhythm, ink, graphite, study energy, and other imagery that clearly belongs to QuizMaker. Keep the app usable as the first screen; do not build a marketing-only landing page before the actual generation workflow.
+
+## UI Composition Expectations
+- Integrate the generation form into an editorial layout instead of dropping it into a plain centered card.
+- Make deck preview, quiz question, answer reveal, results, and history feel like distinct learning moments with strong hierarchy.
+- Use restrained but confident color. Avoid one-note beige, purple, dark slate, generic gradients, or palettes that feel unrelated to learning.
+- Use visual assets or generated abstract imagery where they make the learning experience clearer, richer, or more memorable.
+- Use subtle motion only: hover and focus transitions, answer reveal, quiz progress, and result entrance. Respect reduced-motion preferences.
+- Keep accessibility non-negotiable: contrast, keyboard operation, labels, focus states, responsive layout, and readable text.
+
+## Design Quality Bar
+- Before review, check desktop and mobile layouts.
+- Text must not overflow, overlap, or become decorative at the expense of clarity.
+- Controls must remain obvious and ergonomic.
+- Avoid nested cards, generic dashboards, stock-looking visuals, and excessive explanatory text in the UI.
+- Screenshots for review should include the generation screen, quiz question or answer state, and results screen once those screens exist.
+
 ## Backend Boundary
 The Frontend Expert must not directly edit backend files, backend configuration, backend tests, API route handlers, controllers, services, validators, prompt builders, provider integrations, environment handling, or server startup code.
 
