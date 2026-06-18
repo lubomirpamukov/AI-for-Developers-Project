@@ -1,64 +1,110 @@
 .form {
   display: grid;
-  gap: 18px;
-  border: 1px solid #d8d8d0;
-  border-radius: 8px;
-  background: #ffffff;
-  padding: 20px;
+  gap: 16px;
+  border: 1px solid rgba(255, 250, 240, 0.18);
+  background:
+    linear-gradient(145deg, rgba(255, 250, 240, 0.16), rgba(255, 250, 240, 0.06)),
+    rgba(12, 22, 21, 0.72);
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.28);
+  padding: clamp(18px, 3vw, 28px);
+  backdrop-filter: blur(18px);
 }
 
 .field {
   display: grid;
-  gap: 7px;
+  gap: 8px;
 }
 
 .field label {
-  font-size: 0.925rem;
-  font-weight: 700;
+  color: rgba(255, 250, 240, 0.84);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .field input,
 .field select {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #b9bab2;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #191919;
+  border: 1px solid rgba(255, 250, 240, 0.28);
+  border-radius: 0;
+  outline: 0;
+  background: rgba(7, 13, 13, 0.54);
+  color: #fffaf0;
   font: inherit;
-  padding: 10px 12px;
+  padding: 13px 14px;
+}
+
+.field input::placeholder {
+  color: rgba(255, 250, 240, 0.45);
+}
+
+.field select {
+  color-scheme: dark;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #ddb670;
+  box-shadow: 0 0 0 3px rgba(221, 182, 112, 0.18);
 }
 
 .field input[aria-invalid="true"] {
-  border-color: #a53b2a;
+  border-color: #ffb199;
 }
 
 .field p {
   margin: 0;
-  color: #8a2d20;
+  color: #ffcfbf;
   font-size: 0.875rem;
+  line-height: 1.4;
 }
 
 .row {
   display: grid;
-  grid-template-columns: 1fr 140px;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 0.34fr);
+  gap: 14px;
 }
 
 .form button {
-  justify-self: start;
-  border: 0;
-  border-radius: 6px;
-  background: #24563b;
-  color: #ffffff;
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid #ddb670;
+  border-radius: 0;
+  background: #ddb670;
+  color: #111819;
   cursor: pointer;
   font: inherit;
-  font-weight: 700;
-  padding: 11px 16px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  padding: 13px 18px;
 }
 
 .form button:hover {
-  background: #1d472f;
+  background: #f1cc89;
+  border-color: #f1cc89;
+}
+
+.form button:focus-visible {
+  outline: 3px solid rgba(255, 250, 240, 0.68);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .field input,
+  .field select,
+  .form button {
+    transition:
+      border-color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .form button:hover {
+    transform: translateY(-1px);
+  }
 }
 
 @media (max-width: 560px) {

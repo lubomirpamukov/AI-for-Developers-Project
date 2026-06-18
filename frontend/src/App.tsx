@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import type { Difficulty, GenerateFlashcardsRequest } from "@quizmaker/shared";
+import type { GenerateFlashcardsRequest } from "@quizmaker/shared";
 import { GenerationForm } from "./components/GenerationForm.js";
+import memoryAtelierHero from "./assets/memory-atelier-hero.webp";
 import styles from "./App.module.css";
 
 const initialRequest: GenerateFlashcardsRequest = {
@@ -8,6 +9,13 @@ const initialRequest: GenerateFlashcardsRequest = {
   difficulty: "beginner",
   count: 5
 };
+
+const learningMoments = [
+  "Generate",
+  "Preview",
+  "Quiz",
+  "Remember"
+] as const;
 
 export function App() {
   const [lastRequest, setLastRequest] = useState<GenerateFlashcardsRequest | null>(null);
@@ -26,21 +34,40 @@ export function App() {
 
   return (
     <main className={styles.shell}>
-      <section className={styles.workspace} aria-labelledby="page-title">
-        <div className={styles.header}>
+      <section className={styles.hero} aria-labelledby="page-title">
+        <div className={styles.copyColumn}>
           <p className={styles.eyebrow}>QuizMaker</p>
-          <h1 id="page-title">Generate a focused flashcard deck</h1>
+          <h1 id="page-title">Shape memory into a deck worth revisiting.</h1>
+          <p className={styles.intro}>
+            Generate focused flashcards, move through the quiz, and keep the learning trace close.
+          </p>
+
+          <div className={styles.formStage}>
+            <GenerationForm initialValue={initialRequest} onSubmit={handleGenerate} />
+          </div>
         </div>
 
-        <GenerationForm initialValue={initialRequest} onSubmit={handleGenerate} />
+        <aside className={styles.visualColumn} aria-label="Deck preview atmosphere">
+          <img
+            className={styles.heroImage}
+            src={memoryAtelierHero}
+            alt="Abstract layered flashcards with graphite marks and memory trace lines"
+          />
+          <div className={styles.orbitPanel}>
+            <span className={styles.panelKicker}>Current trace</span>
+            <strong>{previewTitle}</strong>
+          </div>
+        </aside>
+      </section>
 
-        <section className={styles.preview} aria-labelledby="preview-title">
-          <h2 id="preview-title">Deck preview scaffold</h2>
-          <p>{previewTitle}</p>
-        </section>
+      <section className={styles.moments} aria-label="Learning flow">
+        {learningMoments.map((moment, index) => (
+          <div className={styles.moment} key={moment}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <strong>{moment}</strong>
+          </div>
+        ))}
       </section>
     </main>
   );
 }
-
-export const difficulties: Difficulty[] = ["beginner", "intermediate", "advanced"];
