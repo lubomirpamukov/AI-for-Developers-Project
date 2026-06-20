@@ -32,6 +32,15 @@ The Frontend Expert must not make backend changes directly. Backend files, backe
 
 When frontend work needs backend support, the Frontend Expert must hand off a precise request to `.agents/backend-expert.md`, including the needed endpoint or contract change, validation and security constraints, frontend dependency, and suggested backend acceptance checks. Frontend integration resumes after the Backend Expert completes the backend task and receives Reviewer approval.
 
+## Frontend Browser Verification
+For frontend UI work, after relevant automated tests pass, the Frontend Expert must start the localhost frontend and use the project-local Playwright MCP server from `.codex/config.toml` for browser verification when available.
+
+Playwright MCP verification must cover desktop and mobile viewports, relevant visible controls, and the changed loading, success, error, empty, quiz, answer reveal, result, or history states when applicable. The Frontend Expert must include screenshot, viewport, and interaction evidence in the Reviewer handoff.
+
+After the UI reaches the final working version, the Frontend Expert must capture Playwright MCP screenshots at each step of the manual test flow and save them under `shared/manualUITests/<featureName>/`, using a short kebab-case feature name and ordered screenshot filenames that match the tested steps. Screenshots must not expose real user API keys or secrets.
+
+If Playwright MCP is unavailable, the Frontend Expert may use headless Chrome as the fallback browser verification path, but must document why the fallback was needed and include equivalent viewport and interaction evidence where possible.
+
 ## Backend Skill And Frontend Boundary
 The Backend Expert must read and apply `.agents/skills/nodejs-express-server/SKILL.md` for every backend task. When a task needs more detail about Express setup, middleware, database integration, JWT authentication, REST routes, error handling, or environment configuration, the Backend Expert must also read the relevant files under `.agents/skills/nodejs-express-server/references/`.
 
@@ -59,6 +68,8 @@ The Frontend Expert must provide:
 - Tests added or updated.
 - Exact test command executed.
 - Test result summary.
+- Browser tool used for localhost UI verification, including Playwright MCP evidence or the documented headless Chrome fallback.
+- Screenshot directory under `shared/manualUITests/<featureName>/` for the final manual UI test flow.
 - Any known limitations.
 
 ## Backend Task Handoff To Reviewer

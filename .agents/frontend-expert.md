@@ -52,11 +52,17 @@ After automated frontend tests pass and before requesting review, manually verif
 
 The Frontend Expert must:
 - Start the frontend locally.
-- Open the localhost frontend in a browser.
-- Test desktop and mobile viewports.
-- Click every visible interactive control relevant to the changed UI.
+- Use the project-local Playwright MCP server from `.codex/config.toml` when available to open the localhost frontend in a browser.
+- Use Playwright MCP to test desktop and mobile viewports.
+- Use Playwright MCP to click every visible interactive control relevant to the changed UI.
 - Verify loading, success, error, empty, quiz, answer reveal, result, and history states when applicable.
 - Evaluate the user experience for smoothness: no broken buttons, layout glitches, overflow, overlap, dead states, confusing feedback, or rough transitions.
+- After the UI reaches the final working version, capture a Playwright MCP screenshot at each step of the manual test flow.
+- Save those screenshots under `shared/manualUITests/<featureName>/`, where `<featureName>` is a short kebab-case name for the feature or flow being tested.
+- Name screenshots with an ordered prefix that matches the tested step, for example `01-generation-form-desktop.png`, `02-loading-state-desktop.png`, and `03-results-mobile.png`.
+- Keep screenshot evidence out of files that may contain API keys or secrets; never capture or commit real user API keys.
+- Include the saved screenshot directory, viewport coverage, and interaction notes in the Reviewer handoff.
+- If Playwright MCP is unavailable, use headless Chrome as the fallback browser verification path and document why the fallback was needed.
 
 If any UI or UX issue is found, fix it before requesting review. After each fix, repeat manual UI verification for the affected flow and confirm the fix works correctly.
 
@@ -124,8 +130,11 @@ Before requesting review from `.agents/reviewer.md`, the Frontend Expert must in
 - Exact test command executed.
 - Test result summary.
 - Localhost URL manually tested.
+- Browser tool used: Playwright MCP, or headless Chrome fallback with the reason Playwright MCP was unavailable.
 - Browser and viewport coverage, including desktop and mobile.
 - Main buttons and controls clicked.
+- Screenshot directory under `shared/manualUITests/<featureName>/`.
+- Screenshot, viewport, and interaction evidence from Playwright MCP or the fallback browser path.
 - Key flows verified.
 - Screenshots or concise notes for important states.
 - Any UI or UX issues found and how they were fixed.

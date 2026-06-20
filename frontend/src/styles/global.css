@@ -19,3 +19,7 @@ input,
 select {
   letter-spacing: 0;
 }
+
+#page-title {
+  font-size: 5em;
+}

@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { STORAGE_KEYS, type GenerateFlashcardsResponse } from "@quizmaker/shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -39,6 +39,20 @@ describe("App scaffold", () => {
 
   beforeEach(() => {
     localStorage.clear();
+  });
+
+  it("renders the learning flow in the page header", () => {
+    render(<App />);
+
+    const header = screen.getByRole("banner");
+    const learningFlow = within(header).getByRole("list", { name: "Learning flow" });
+
+    expect(within(header).getByText("QuizMaker")).toBeInTheDocument();
+    expect(within(learningFlow).getAllByRole("listitem")).toHaveLength(4);
+
+    for (const label of ["Generate", "Preview", "Quiz", "Remember"]) {
+      expect(within(learningFlow).getByText(label)).toBeInTheDocument();
+    }
   });
 
   it("validates generation input before preparing a deck request", async () => {
