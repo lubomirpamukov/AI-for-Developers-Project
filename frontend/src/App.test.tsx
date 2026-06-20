@@ -87,7 +87,7 @@ describe("App scaffold", () => {
     expect(localStorage.getItem(STORAGE_KEYS.decks) ?? "").not.toContain("secret-key");
   });
 
-  it("opens the generated deck in a modal and flips a flashcard", async () => {
+  it("opens the generated deck in a modal and expands a flashcard reader", async () => {
     const user = userEvent.setup();
     mockJsonFetch(generatedDeck);
     render(<App />);
@@ -105,10 +105,15 @@ describe("App scaffold", () => {
     expect(screen.getByRole("dialog", { name: "React state" })).toBeInTheDocument();
     expect(screen.getByTestId("deck-card-spread")).toBeInTheDocument();
 
-    const flashcard = screen.getByRole("button", { name: "What is React state?" });
-    expect(flashcard).toHaveAttribute("aria-pressed", "false");
+    await user.click(screen.getByRole("button", { name: "Open card 1: What is React state?" }));
 
-    await user.click(flashcard);
+    expect(screen.queryByTestId("deck-card-spread")).not.toBeInTheDocument();
+    expect(screen.getByTestId("deck-card-reader")).toBeInTheDocument();
+
+    const readerCard = screen.getByRole("button", { name: "What is React state?" });
+    expect(readerCard).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(readerCard);
 
     expect(
       screen.getByRole("button", {
@@ -137,7 +142,7 @@ describe("App scaffold", () => {
     expect(deckTrigger).toHaveFocus();
   });
 
-  it("supports keyboard opening, card flipping, and Escape closing", async () => {
+  it("supports keyboard opening, reader expansion, card flipping, and Escape closing", async () => {
     const user = userEvent.setup();
     mockJsonFetch(generatedDeck);
     render(<App />);
@@ -152,6 +157,12 @@ describe("App scaffold", () => {
     await user.keyboard("{Enter}");
 
     expect(screen.getByRole("button", { name: "Close flashcard deck" })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Open card 1: What is React state?" })).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("button", { name: "Back to deck" })).toHaveFocus();
 
     await user.tab();
     expect(screen.getByRole("button", { name: "What is React state?" })).toHaveFocus();

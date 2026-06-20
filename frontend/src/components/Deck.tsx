@@ -13,12 +13,19 @@ const closeAnimationMs = 220;
 export function Deck({ deck, provider }: DeckProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const readerBackButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const openButtonRef = useRef<HTMLButtonElement>(null);
   const closeTimerRef = useRef<number | null>(null);
   const cardCountLabel = deck.cards.length === 1 ? "card" : "cards";
   const modalTitleId = `${deck.deckId}-deck-title`;
+  const selectedCardEntry = selectedCardId
+    ? deck.cards
+        .map((card, index) => ({ card, index }))
+        .find((entry) => entry.card.id === selectedCardId)
+    : undefined;
 
   useEffect(() => {
     return () => {
@@ -54,6 +61,12 @@ export function Deck({ deck, provider }: DeckProps) {
     };
   }, [isModalOpen]);
 
+  useEffect(() => {
+    if (selectedCardEntry) {
+      readerBackButtonRef.current?.focus();
+    }
+  }, [selectedCardEntry]);
+
   function openDeck() {
     if (closeTimerRef.current !== null) {
       window.clearTimeout(closeTimerRef.current);
@@ -73,6 +86,7 @@ export function Deck({ deck, provider }: DeckProps) {
     closeTimerRef.current = window.setTimeout(() => {
       setIsModalOpen(false);
       setIsClosing(false);
+      setSelectedCardId(null);
       closeTimerRef.current = null;
       openButtonRef.current?.focus();
     }, closeAnimationMs);
@@ -152,7 +166,9 @@ export function Deck({ deck, provider }: DeckProps) {
                 <span className={styles.modalKicker}>{formatProviderName(provider)}</span>
                 <h2 id={modalTitleId}>{deck.topic}</h2>
                 <p>
-                  {deck.cards.length} {deck.difficulty} {cardCountLabel}. Tap a card to turn it over.
+                  {selectedCardEntry
+                    ? "Reading one card. Tap the enlarged card to reveal the answer."
+                    : `${deck.cards.length} ${deck.difficulty} ${cardCountLabel}. Choose a card to enlarge it.`}
                 </p>
               </div>
               <button
@@ -166,11 +182,35 @@ export function Deck({ deck, provider }: DeckProps) {
               </button>
             </header>
 
-            <div className={styles.spread} data-testid="deck-card-spread">
-              {deck.cards.map((card, index) => (
-                <Flashcard card={card} index={index} key={card.id} />
-              ))}
-            </div>
+            {selectedCardEntry ? (
+              <div className={styles.readerStage} data-testid="deck-card-reader">
+                <button
+                  className={styles.readerBackButton}
+                  onClick={() => setSelectedCardId(null)}
+                  ref={readerBackButtonRef}
+                  type="button"
+                >
+                  Back to deck
+                </button>
+                <Flashcard
+                  card={selectedCardEntry.card}
+                  index={selectedCardEntry.index}
+                  key={selectedCardEntry.card.id}
+                  variant="reader"
+                />
+              </div>
+            ) : (
+              <div className={styles.spread} data-testid="deck-card-spread">
+                {deck.cards.map((card, index) => (
+                  <Flashcard
+                    card={card}
+                    index={index}
+                    key={card.id}
+                    onOpen={() => setSelectedCardId(card.id)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ) : null}

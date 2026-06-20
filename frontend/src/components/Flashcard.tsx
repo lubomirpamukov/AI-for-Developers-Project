@@ -5,25 +5,37 @@ import styles from "./Flashcard.module.css";
 interface FlashcardProps {
   card: FlashcardModel;
   index: number;
+  onOpen?: () => void;
+  variant?: "preview" | "reader";
 }
 
-export function Flashcard({ card, index }: FlashcardProps) {
+export function Flashcard({ card, index, onOpen, variant = "preview" }: FlashcardProps) {
   const [isAnswerVisible, setIsAnswerVisible] = useState(false);
   const questionId = useId();
   const answerId = useId();
   const cardNumber = index + 1;
-  const activeLabel = isAnswerVisible ? card.answer : card.question;
+  const isReader = variant === "reader";
+  const activeLabel = isReader
+    ? isAnswerVisible
+      ? card.answer
+      : card.question
+    : `Open card ${cardNumber}: ${card.question}`;
 
-  function handleFlip() {
+  function handleClick() {
+    if (!isReader) {
+      onOpen?.();
+      return;
+    }
+
     setIsAnswerVisible((currentValue) => !currentValue);
   }
 
   return (
     <button
       aria-label={activeLabel}
-      aria-pressed={isAnswerVisible}
-      className={`${styles.card} ${isAnswerVisible ? styles.isFlipped : ""}`}
-      onClick={handleFlip}
+      aria-pressed={isReader ? isAnswerVisible : undefined}
+      className={`${styles.card} ${styles[variant]} ${isAnswerVisible ? styles.isFlipped : ""}`}
+      onClick={handleClick}
       type="button"
     >
       <span aria-hidden={isAnswerVisible} className={`${styles.face} ${styles.frontFace}`}>
