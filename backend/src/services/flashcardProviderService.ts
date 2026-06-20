@@ -1,3 +1,4 @@
+import { GoogleGenAI } from "@google/genai";
 import type {
   ApiProvider,
   GenerateFlashcardsRequest,
@@ -27,16 +28,44 @@ export class ProviderGenerationError extends Error {
 }
 
 export class GeminiFlashcardService implements FlashcardGenerator {
-  constructor(private readonly apiKey?: string) {}
+  constructor(
+    private readonly apiKey: string | undefined,
+    private readonly model: string
+  ) {}
 
   async generateFlashcards(
     request: GenerateFlashcardsRequest
   ): Promise<GenerateFlashcardsResponse> {
-    if (!request.apiKey && !this.apiKey) {
+    const apiKey = request.apiKey ?? this.apiKey;
+
+    if (!apiKey) {
       throw new MissingProviderApiKeyError("gemini");
     }
 
-    throw new ProviderGenerationError("gemini");
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await ai.models.generateContent({
+        model: this.model,
+        contents: buildFlashcardPrompt(request),
+        config: {
+          responseMimeType: "application/json",
+          responseJsonSchema: flashcardDeckSchema(request.count),
+          temperature: 0.4
+        }
+      });
+
+      if (typeof response.text !== "string") {
+        throw new Error("Gemini response did not include text output.");
+      }
+
+      return mapProviderDeck(JSON.parse(response.text), request);
+    } catch (error) {
+      if (error instanceof ProviderGenerationError) {
+        throw error;
+      }
+
+      throw new ProviderGenerationError("gemini");
+    }
   }
 }
 
@@ -136,7 +165,7 @@ export class ProviderFlashcardService implements FlashcardGenerator {
 
   constructor(env: ServerEnv) {
     this.services = {
-      gemini: new GeminiFlashcardService(env.geminiApiKey),
+      gemini: new GeminiFlashcardService(env.geminiApiKey, env.geminiModel),
       openai: new OpenAIFlashcardService(env.openaiApiKey, env.openaiModel)
     };
   }

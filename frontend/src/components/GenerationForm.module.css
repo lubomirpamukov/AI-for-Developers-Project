@@ -86,6 +86,11 @@
   border-color: #f1cc89;
 }
 
+.form button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .form button:focus-visible {
   outline: 3px solid rgba(255, 250, 240, 0.68);
   outline-offset: 3px;
@@ -102,7 +107,7 @@
       transform 180ms ease;
   }
 
-  .form button:hover {
+  .form button:hover:not(:disabled) {
     transform: translateY(-1px);
   }
 }

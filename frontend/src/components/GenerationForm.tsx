@@ -6,10 +6,15 @@ import styles from "./GenerationForm.module.css";
 
 interface GenerationFormProps {
   initialValue: GenerateFlashcardsRequest;
-  onSubmit: (request: GenerateFlashcardsRequest) => void;
+  isSubmitting?: boolean;
+  onSubmit: (request: GenerateFlashcardsRequest) => void | Promise<void>;
 }
 
-export function GenerationForm({ initialValue, onSubmit }: GenerationFormProps) {
+export function GenerationForm({
+  initialValue,
+  isSubmitting = false,
+  onSubmit
+}: GenerationFormProps) {
   const topicId = useId();
   const difficultyId = useId();
   const countId = useId();
@@ -24,6 +29,10 @@ export function GenerationForm({ initialValue, onSubmit }: GenerationFormProps) 
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
 
     const validation = validateGenerationInput({
       topic,
@@ -126,7 +135,9 @@ export function GenerationForm({ initialValue, onSubmit }: GenerationFormProps) 
         />
       </div>
 
-      <button type="submit">Prepare deck request</button>
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Generating deck" : "Generate deck"}
+      </button>
     </form>
   );
 }

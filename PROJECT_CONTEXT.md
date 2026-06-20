@@ -112,6 +112,7 @@ Shared contracts should include:
 
 ## Security Rules
 - Prefer `GEMINI_API_KEY` or `OPENAI_API_KEY` from the backend `.env` file for the selected provider.
+- `GEMINI_MODEL` configures the Gemini model and defaults to `gemini-2.5-flash`.
 - `OPENAI_MODEL` configures the OpenAI model and defaults to `gpt-5.5`.
 - Optional user-provided API keys are allowed only for one request.
 - Never store API keys in localStorage, sessionStorage, source code, logs, screenshots, or test snapshots.

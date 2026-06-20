@@ -140,6 +140,23 @@
   line-height: 1.18;
 }
 
+.deckStage {
+  position: relative;
+  z-index: 2;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.errorNotice {
+  max-width: 680px;
+  margin: 0 0 18px;
+  border-left: 4px solid #ffb199;
+  background: rgba(80, 28, 23, 0.5);
+  color: #ffe5dc;
+  line-height: 1.5;
+  padding: 14px 16px;
+}
+
 .moments {
   position: relative;
   z-index: 2;
@@ -223,6 +240,7 @@
   .moments {
     grid-template-columns: repeat(2, 1fr);
   }
+
 }
 
 @media (max-width: 560px) {

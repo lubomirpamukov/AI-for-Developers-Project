@@ -1,13 +1,37 @@
 import request from "supertest";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GenerateFlashcardsRequest, GenerateFlashcardsResponse } from "@quizmaker/shared";
 import { createApp } from "../app.js";
 import {
+  GeminiFlashcardService,
   MissingProviderApiKeyError,
   OpenAIFlashcardService,
   ProviderGenerationError,
   type FlashcardGenerator
 } from "../services/flashcardProviderService.js";
+
+const geminiGenerateContentMock = vi.hoisted(() => vi.fn());
+const googleGenAIConstructorMock = vi.hoisted(() =>
+  vi.fn(function GoogleGenAIMock() {
+    return {
+      models: {
+        generateContent: geminiGenerateContentMock
+      }
+    };
+  })
+);
+
+function createGeminiClientMock() {
+  return {
+    models: {
+      generateContent: geminiGenerateContentMock
+    }
+  };
+}
+
+vi.mock("@google/genai", () => ({
+  GoogleGenAI: googleGenAIConstructorMock
+}));
 
 function createMockGenerator(
   generateFlashcards: FlashcardGenerator["generateFlashcards"]
@@ -182,6 +206,144 @@ describe("QuizMaker API scaffold", () => {
       code: "GENERATION_FAILED"
     });
     expect(JSON.stringify(response.body)).not.toContain("test-only-key");
+  });
+});
+
+describe("GeminiFlashcardService", () => {
+  beforeEach(() => {
+    geminiGenerateContentMock.mockReset();
+    googleGenAIConstructorMock.mockClear();
+    googleGenAIConstructorMock.mockImplementation(function GoogleGenAIMock() {
+      return createGeminiClientMock();
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const requestBody: GenerateFlashcardsRequest = {
+    topic: "TypeScript",
+    difficulty: "beginner",
+    count: 2,
+    provider: "gemini",
+    apiKey: "request-key"
+  };
+
+  it("calls Gemini with structured JSON output and maps generated cards", async () => {
+    geminiGenerateContentMock.mockResolvedValue({
+      text: JSON.stringify({
+        cards: [
+          {
+            question: "What is TypeScript?",
+            answer: "A typed superset of JavaScript."
+          },
+          {
+            question: "Why use types?",
+            answer: "They catch many mistakes earlier."
+          }
+        ]
+      })
+    });
+
+    const service = new GeminiFlashcardService("server-key", "gemini-test");
+    const deck = await service.generateFlashcards(requestBody);
+
+    expect(googleGenAIConstructorMock).toHaveBeenCalledWith({
+      apiKey: "request-key"
+    });
+    expect(geminiGenerateContentMock).toHaveBeenCalledWith({
+      model: "gemini-test",
+      contents: expect.stringContaining(
+        'Create 2 beginner flashcards about "TypeScript".'
+      ),
+      config: expect.objectContaining({
+        responseMimeType: "application/json",
+        responseJsonSchema: expect.objectContaining({
+          type: "object"
+        }),
+        temperature: 0.4
+      })
+    });
+    expect(deck).toMatchObject({
+      topic: "TypeScript",
+      difficulty: "beginner",
+      cards: [
+        {
+          id: "card-1",
+          question: "What is TypeScript?",
+          answer: "A typed superset of JavaScript."
+        },
+        {
+          id: "card-2",
+          question: "Why use types?",
+          answer: "They catch many mistakes earlier."
+        }
+      ]
+    });
+  });
+
+  it("uses the configured server Gemini key when the request has no API key", async () => {
+    geminiGenerateContentMock.mockResolvedValue({
+      text: JSON.stringify({
+        cards: [
+          {
+            question: "What is TypeScript?",
+            answer: "A typed superset of JavaScript."
+          },
+          {
+            question: "Why use types?",
+            answer: "They catch many mistakes earlier."
+          }
+        ]
+      })
+    });
+
+    const service = new GeminiFlashcardService("server-key", "gemini-test");
+    await service.generateFlashcards({
+      ...requestBody,
+      apiKey: undefined
+    });
+
+    expect(googleGenAIConstructorMock).toHaveBeenCalledWith({
+      apiKey: "server-key"
+    });
+  });
+
+  it("requires a Gemini API key", async () => {
+    const service = new GeminiFlashcardService(undefined, "gemini-test");
+
+    await expect(
+      service.generateFlashcards({
+        ...requestBody,
+        apiKey: undefined
+      })
+    ).rejects.toThrow(MissingProviderApiKeyError);
+    expect(googleGenAIConstructorMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects malformed Gemini output", async () => {
+    geminiGenerateContentMock.mockResolvedValue({
+      text: JSON.stringify({
+        cards: [{ question: "", answer: "Missing question." }]
+      })
+    });
+
+    const service = new GeminiFlashcardService("server-key", "gemini-test");
+
+    await expect(service.generateFlashcards(requestBody)).rejects.toThrow(
+      ProviderGenerationError
+    );
+  });
+
+  it("wraps Gemini provider failures", async () => {
+    geminiGenerateContentMock.mockRejectedValue(new Error("provider failed"));
+
+    const service = new GeminiFlashcardService("server-key", "gemini-test");
+
+    await expect(service.generateFlashcards(requestBody)).rejects.toThrow(
+      ProviderGenerationError
+    );
   });
 });
 

@@ -1,7 +1,14 @@
 import { useMemo, useState } from "react";
-import type { GenerateFlashcardsRequest } from "@quizmaker/shared";
+import type { GenerateFlashcardsRequest, GenerateFlashcardsResponse } from "@quizmaker/shared";
+import { generateFlashcards } from "./api/quizmakerApi.js";
+import { Deck } from "./components/Deck.js";
 import { GenerationForm } from "./components/GenerationForm.js";
-import { loadPreferences, savePreferences } from "./storage/quizStorage.js";
+import {
+  loadPreferences,
+  loadStoredDecks,
+  savePreferences,
+  saveStoredDecks
+} from "./storage/quizStorage.js";
 import memoryAtelierHero from "./assets/memory-atelier-hero.webp";
 import styles from "./App.module.css";
 
@@ -24,22 +31,60 @@ export function App() {
     };
   });
   const [lastRequest, setLastRequest] = useState<GenerateFlashcardsRequest | null>(null);
+  const [deck, setDeck] = useState<GenerateFlashcardsResponse | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const previewTitle = useMemo(() => {
+    if (isGenerating && lastRequest) {
+      return `${formatProviderName(lastRequest.provider)} is shaping ${lastRequest.count} ${lastRequest.difficulty} cards about ${lastRequest.topic}`;
+    }
+
+    if (deck) {
+      return `${deck.cards.length} ${deck.difficulty} cards ready about ${deck.topic}`;
+    }
+
+    if (generationError) {
+      return "Deck request needs another try";
+    }
+
     if (!lastRequest) {
       return "No deck requested yet";
     }
 
     return `${formatProviderName(lastRequest.provider)} will shape ${lastRequest.count} ${lastRequest.difficulty} cards about ${lastRequest.topic}`;
-  }, [lastRequest]);
+  }, [deck, generationError, isGenerating, lastRequest]);
 
-  function handleGenerate(request: GenerateFlashcardsRequest) {
+  async function handleGenerate(request: GenerateFlashcardsRequest) {
     setLastRequest(request);
+    setGenerationError(null);
+    setIsGenerating(true);
     savePreferences({
       lastDifficulty: request.difficulty,
       lastCount: request.count,
       lastProvider: request.provider
     });
+
+    try {
+      const generatedDeck = await generateFlashcards(request);
+      setDeck(generatedDeck);
+      saveStoredDecks([
+        {
+          ...generatedDeck,
+          createdAt: new Date().toISOString()
+        },
+        ...loadStoredDecks()
+      ]);
+    } catch (error) {
+      setDeck(null);
+      setGenerationError(
+        error instanceof Error
+          ? error.message
+          : "We could not generate flashcards right now."
+      );
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   return (
@@ -53,7 +98,11 @@ export function App() {
           </p>
 
           <div className={styles.formStage}>
-            <GenerationForm initialValue={initialRequest} onSubmit={handleGenerate} />
+            <GenerationForm
+              initialValue={initialRequest}
+              isSubmitting={isGenerating}
+              onSubmit={handleGenerate}
+            />
           </div>
         </div>
 
@@ -68,6 +117,18 @@ export function App() {
             <strong>{previewTitle}</strong>
           </div>
         </aside>
+      </section>
+
+      <section className={styles.deckStage} aria-live="polite" aria-busy={isGenerating}>
+        {generationError ? (
+          <p className={styles.errorNotice} role="alert">
+            {generationError}
+          </p>
+        ) : null}
+
+        {deck ? (
+          <Deck deck={deck} provider={lastRequest?.provider ?? "gemini"} />
+        ) : null}
       </section>
 
       <section className={styles.moments} aria-label="Learning flow">
