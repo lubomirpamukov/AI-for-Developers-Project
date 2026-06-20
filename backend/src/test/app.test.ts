@@ -266,6 +266,9 @@ describe("GeminiFlashcardService", () => {
       })
     });
     expect(deck).toMatchObject({
+      deckId: expect.stringMatching(
+        /^deck-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      ),
       topic: "TypeScript",
       difficulty: "beginner",
       cards: [
@@ -402,6 +405,9 @@ describe("OpenAIFlashcardService", () => {
       })
     );
     expect(deck).toMatchObject({
+      deckId: expect.stringMatching(
+        /^deck-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+      ),
       topic: "TypeScript",
       difficulty: "beginner",
       cards: [

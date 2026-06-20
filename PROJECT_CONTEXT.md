@@ -164,6 +164,8 @@ Quiz history record:
 Preferences must contain only non-sensitive UI preferences. Do not store provider API keys or generated prompt data.
 Provider preference is non-sensitive and may be stored as `lastProvider`; API keys must never be stored.
 
+The visible multi-deck rail is session-only. It starts empty on page load, appends newly generated decks from left to right, and does not rehydrate old decks from localStorage. Generated decks may still be written to `quizmaker:v1:decks` as local history.
+
 ## Expected Screens
 - Flashcard generation form.
 - Generated deck preview.

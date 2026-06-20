@@ -17,6 +17,19 @@ const generatedDeck: GenerateFlashcardsResponse = {
   ]
 };
 
+const secondGeneratedDeck: GenerateFlashcardsResponse = {
+  deckId: "deck-2",
+  topic: "TypeScript generics",
+  difficulty: "intermediate",
+  cards: [
+    {
+      id: "card-1",
+      question: "What does a generic type parameter do?",
+      answer: "It lets a type or function preserve information about a value shape."
+    }
+  ]
+};
+
 describe("App scaffold", () => {
   afterEach(() => {
     cleanup();
@@ -87,6 +100,58 @@ describe("App scaffold", () => {
     expect(localStorage.getItem(STORAGE_KEYS.decks) ?? "").not.toContain("secret-key");
   });
 
+  it("appends generated decks to the session rail from left to right", async () => {
+    const user = userEvent.setup();
+    mockSequentialJsonFetch(generatedDeck, secondGeneratedDeck);
+    render(<App />);
+
+    await user.type(screen.getByLabelText("Topic"), "React state");
+    await user.clear(screen.getByLabelText("Cards"));
+    await user.type(screen.getByLabelText("Cards"), "1");
+    await user.click(screen.getByRole("button", { name: "Generate deck" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Open React state flashcard deck" })
+    ).toBeInTheDocument();
+
+    await user.clear(screen.getByLabelText("Topic"));
+    await user.type(screen.getByLabelText("Topic"), "TypeScript generics");
+    await user.click(screen.getByRole("button", { name: "Generate deck" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Open TypeScript generics flashcard deck" })
+    ).toBeInTheDocument();
+
+    const deckTriggers = screen.getAllByRole("button", {
+      name: /Open .* flashcard deck/
+    });
+
+    expect(deckTriggers.map((trigger) => trigger.getAttribute("aria-label"))).toEqual([
+      "Open React state flashcard deck",
+      "Open TypeScript generics flashcard deck"
+    ]);
+    expect(screen.getByText("What does a generic type parameter do?")).toBeInTheDocument();
+  });
+
+  it("does not load previously stored decks into the session rail", () => {
+    localStorage.setItem(
+      STORAGE_KEYS.decks,
+      JSON.stringify([
+        {
+          ...generatedDeck,
+          createdAt: "2026-06-20T00:00:00.000Z"
+        }
+      ])
+    );
+
+    render(<App />);
+
+    expect(
+      screen.queryByRole("button", { name: "Open React state flashcard deck" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("The session deck rail is waiting.")).toBeInTheDocument();
+  });
+
   it("opens the generated deck in a modal and expands a flashcard reader", async () => {
     const user = userEvent.setup();
     mockJsonFetch(generatedDeck);
@@ -103,6 +168,7 @@ describe("App scaffold", () => {
     await user.click(deckTrigger);
 
     expect(screen.getByRole("dialog", { name: "React state" })).toBeInTheDocument();
+    expect(screen.getByTestId("deck-modal-overlay").parentElement).toBe(document.body);
     expect(screen.getByTestId("deck-card-spread")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Open card 1: What is React state?" }));
@@ -218,10 +284,57 @@ describe("App scaffold", () => {
       await screen.findByText("We could not generate flashcards right now. Please try again.")
     ).toHaveAttribute("role", "alert");
   });
+
+  it("keeps existing session decks visible when a later generation fails", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(generatedDeck))
+      .mockResolvedValueOnce(
+        jsonResponse(
+          {
+            error: "We could not generate flashcards right now. Please try again.",
+            code: "GENERATION_FAILED"
+          },
+          502
+        )
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<App />);
+
+    await user.type(screen.getByLabelText("Topic"), "React state");
+    await user.click(screen.getByRole("button", { name: "Generate deck" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Open React state flashcard deck" })
+    ).toBeInTheDocument();
+
+    await user.clear(screen.getByLabelText("Topic"));
+    await user.type(screen.getByLabelText("Topic"), "A failing topic");
+    await user.click(screen.getByRole("button", { name: "Generate deck" }));
+
+    expect(
+      await screen.findByText("We could not generate flashcards right now. Please try again.")
+    ).toHaveAttribute("role", "alert");
+    expect(
+      screen.getByRole("button", { name: "Open React state flashcard deck" })
+    ).toBeInTheDocument();
+  });
 });
 
 function mockJsonFetch(body: unknown, status = 200) {
   const fetchMock = vi.fn(async () => jsonResponse(body, status));
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
+}
+
+function mockSequentialJsonFetch(...bodies: unknown[]) {
+  const fetchMock = vi.fn();
+
+  for (const body of bodies) {
+    fetchMock.mockResolvedValueOnce(jsonResponse(body));
+  }
+
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }

@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import type { GenerateFlashcardsRequest, GenerateFlashcardsResponse } from "@quizmaker/shared";
+import type {
+  ApiProvider,
+  GenerateFlashcardsRequest,
+  GenerateFlashcardsResponse
+} from "@quizmaker/shared";
 import { generateFlashcards } from "./api/quizmakerApi.js";
 import { Deck } from "./components/Deck.js";
 import { GenerationForm } from "./components/GenerationForm.js";
@@ -19,6 +23,11 @@ const learningMoments = [
   "Remember"
 ] as const;
 
+interface SessionDeck {
+  deck: GenerateFlashcardsResponse;
+  provider: ApiProvider;
+}
+
 export function App() {
   const [initialRequest] = useState<GenerateFlashcardsRequest>(() => {
     const preferences = loadPreferences();
@@ -31,7 +40,7 @@ export function App() {
     };
   });
   const [lastRequest, setLastRequest] = useState<GenerateFlashcardsRequest | null>(null);
-  const [deck, setDeck] = useState<GenerateFlashcardsResponse | null>(null);
+  const [sessionDecks, setSessionDecks] = useState<SessionDeck[]>([]);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -40,8 +49,11 @@ export function App() {
       return `${formatProviderName(lastRequest.provider)} is shaping ${lastRequest.count} ${lastRequest.difficulty} cards about ${lastRequest.topic}`;
     }
 
-    if (deck) {
-      return `${deck.cards.length} ${deck.difficulty} cards ready about ${deck.topic}`;
+    const latestEntry = sessionDecks[sessionDecks.length - 1];
+
+    if (latestEntry) {
+      const deckCountLabel = sessionDecks.length === 1 ? "deck" : "decks";
+      return `${sessionDecks.length} ${deckCountLabel} in this session. Latest: ${latestEntry.deck.cards.length} ${latestEntry.deck.difficulty} cards about ${latestEntry.deck.topic}`;
     }
 
     if (generationError) {
@@ -53,7 +65,7 @@ export function App() {
     }
 
     return `${formatProviderName(lastRequest.provider)} will shape ${lastRequest.count} ${lastRequest.difficulty} cards about ${lastRequest.topic}`;
-  }, [deck, generationError, isGenerating, lastRequest]);
+  }, [generationError, isGenerating, lastRequest, sessionDecks]);
 
   async function handleGenerate(request: GenerateFlashcardsRequest) {
     setLastRequest(request);
@@ -67,7 +79,13 @@ export function App() {
 
     try {
       const generatedDeck = await generateFlashcards(request);
-      setDeck(generatedDeck);
+      setSessionDecks((currentDecks) => [
+        ...currentDecks,
+        {
+          deck: generatedDeck,
+          provider: request.provider
+        }
+      ]);
       saveStoredDecks([
         {
           ...generatedDeck,
@@ -76,7 +94,6 @@ export function App() {
         ...loadStoredDecks()
       ]);
     } catch (error) {
-      setDeck(null);
       setGenerationError(
         error instanceof Error
           ? error.message
@@ -120,15 +137,35 @@ export function App() {
       </section>
 
       <section className={styles.deckStage} aria-live="polite" aria-busy={isGenerating}>
+        {isGenerating ? (
+          <p className={styles.statusNotice}>
+            {lastRequest
+              ? `${formatProviderName(lastRequest.provider)} is preparing the next deck.`
+              : "Preparing the next deck."}
+          </p>
+        ) : null}
+
         {generationError ? (
           <p className={styles.errorNotice} role="alert">
             {generationError}
           </p>
         ) : null}
 
-        {deck ? (
-          <Deck deck={deck} provider={lastRequest?.provider ?? "gemini"} />
-        ) : null}
+        {sessionDecks.length > 0 ? (
+          <div
+            aria-label="Generated decks in this session"
+            className={styles.deckRail}
+            role="list"
+          >
+            {sessionDecks.map((entry) => (
+              <div className={styles.deckRailItem} key={entry.deck.deckId} role="listitem">
+                <Deck deck={entry.deck} provider={entry.provider} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className={styles.emptyNotice}>The session deck rail is waiting.</p>
+        )}
       </section>
 
       <section className={styles.moments} aria-label="Learning flow">

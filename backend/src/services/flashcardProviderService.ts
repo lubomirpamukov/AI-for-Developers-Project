@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { GoogleGenAI } from "@google/genai";
 import type {
   ApiProvider,
@@ -245,7 +246,7 @@ function mapProviderDeck(
   });
 
   return {
-    deckId: `deck-${Date.now()}`,
+    deckId: `deck-${randomUUID()}`,
     topic: request.topic,
     difficulty: request.difficulty,
     cards

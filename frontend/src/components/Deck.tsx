@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { ApiProvider, FlashcardDeck } from "@quizmaker/shared";
 import { Flashcard } from "./Flashcard.js";
 import styles from "./Deck.module.css";
@@ -131,6 +132,70 @@ export function Deck({ deck, provider }: DeckProps) {
     }
   }
 
+  const modal = isModalOpen ? (
+    <div
+      aria-labelledby={modalTitleId}
+      aria-modal="true"
+      className={`${styles.overlay} ${isClosing ? styles.isClosing : ""}`}
+      data-testid="deck-modal-overlay"
+      onMouseDown={handleOverlayMouseDown}
+      role="dialog"
+    >
+      <div className={styles.modal} ref={modalRef}>
+        <header className={styles.modalHeader}>
+          <div>
+            <span className={styles.modalKicker}>{formatProviderName(provider)}</span>
+            <h2 id={modalTitleId}>{deck.topic}</h2>
+            <p>
+              {selectedCardEntry
+                ? "Reading one card. Tap the enlarged card to reveal the answer."
+                : `${deck.cards.length} ${deck.difficulty} ${cardCountLabel}. Choose a card to enlarge it.`}
+            </p>
+          </div>
+          <button
+            aria-label="Close flashcard deck"
+            className={styles.closeButton}
+            onClick={closeDeck}
+            ref={closeButtonRef}
+            type="button"
+          >
+            <span aria-hidden="true">x</span>
+          </button>
+        </header>
+
+        {selectedCardEntry ? (
+          <div className={styles.readerStage} data-testid="deck-card-reader">
+            <button
+              className={styles.readerBackButton}
+              onClick={() => setSelectedCardId(null)}
+              ref={readerBackButtonRef}
+              type="button"
+            >
+              Back to deck
+            </button>
+            <Flashcard
+              card={selectedCardEntry.card}
+              index={selectedCardEntry.index}
+              key={selectedCardEntry.card.id}
+              variant="reader"
+            />
+          </div>
+        ) : (
+          <div className={styles.spread} data-testid="deck-card-spread">
+            {deck.cards.map((card, index) => (
+              <Flashcard
+                card={card}
+                index={index}
+                key={card.id}
+                onOpen={() => setSelectedCardId(card.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div className={styles.deckRoot}>
       <button
@@ -151,69 +216,7 @@ export function Deck({ deck, provider }: DeckProps) {
         <span className={styles.deckAction}>Open deck</span>
       </button>
 
-      {isModalOpen ? (
-        <div
-          aria-labelledby={modalTitleId}
-          aria-modal="true"
-          className={`${styles.overlay} ${isClosing ? styles.isClosing : ""}`}
-          data-testid="deck-modal-overlay"
-          onMouseDown={handleOverlayMouseDown}
-          role="dialog"
-        >
-          <div className={styles.modal} ref={modalRef}>
-            <header className={styles.modalHeader}>
-              <div>
-                <span className={styles.modalKicker}>{formatProviderName(provider)}</span>
-                <h2 id={modalTitleId}>{deck.topic}</h2>
-                <p>
-                  {selectedCardEntry
-                    ? "Reading one card. Tap the enlarged card to reveal the answer."
-                    : `${deck.cards.length} ${deck.difficulty} ${cardCountLabel}. Choose a card to enlarge it.`}
-                </p>
-              </div>
-              <button
-                aria-label="Close flashcard deck"
-                className={styles.closeButton}
-                onClick={closeDeck}
-                ref={closeButtonRef}
-                type="button"
-              >
-                <span aria-hidden="true">x</span>
-              </button>
-            </header>
-
-            {selectedCardEntry ? (
-              <div className={styles.readerStage} data-testid="deck-card-reader">
-                <button
-                  className={styles.readerBackButton}
-                  onClick={() => setSelectedCardId(null)}
-                  ref={readerBackButtonRef}
-                  type="button"
-                >
-                  Back to deck
-                </button>
-                <Flashcard
-                  card={selectedCardEntry.card}
-                  index={selectedCardEntry.index}
-                  key={selectedCardEntry.card.id}
-                  variant="reader"
-                />
-              </div>
-            ) : (
-              <div className={styles.spread} data-testid="deck-card-spread">
-                {deck.cards.map((card, index) => (
-                  <Flashcard
-                    card={card}
-                    index={index}
-                    key={card.id}
-                    onOpen={() => setSelectedCardId(card.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
+      {modal ? createPortal(modal, document.body) : null}
     </div>
   );
 }
