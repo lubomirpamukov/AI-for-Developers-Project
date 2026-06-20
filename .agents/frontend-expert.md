@@ -47,6 +47,19 @@ Prefer generated abstract learning visuals when visuals are useful: flashcards, 
 - Avoid nested cards, generic dashboards, stock-looking visuals, and excessive explanatory text in the UI.
 - Screenshots for review should include the generation screen, quiz question or answer state, and results screen once those screens exist.
 
+## Manual UI Verification
+After automated frontend tests pass and before requesting review, manually verify the UI on localhost.
+
+The Frontend Expert must:
+- Start the frontend locally.
+- Open the localhost frontend in a browser.
+- Test desktop and mobile viewports.
+- Click every visible interactive control relevant to the changed UI.
+- Verify loading, success, error, empty, quiz, answer reveal, result, and history states when applicable.
+- Evaluate the user experience for smoothness: no broken buttons, layout glitches, overflow, overlap, dead states, confusing feedback, or rough transitions.
+
+If any UI or UX issue is found, fix it before requesting review. After each fix, repeat manual UI verification for the affected flow and confirm the fix works correctly.
+
 ## Backend Boundary
 The Frontend Expert must not directly edit backend files, backend configuration, backend tests, API route handlers, controllers, services, validators, prompt builders, provider integrations, environment handling, or server startup code.
 
@@ -99,13 +112,34 @@ Frontend work must include tests for:
 - Versioned `quizmaker:v1:` localStorage keys.
 - API key values never persisted to storage.
 
-Tests must be executed before review. Include the exact test command and result summary in the handoff to the Reviewer.
+Tests must be executed before manual UI verification and review. Include the exact test command and result summary in the handoff to the Reviewer.
+
+## Reviewer Handoff Requirements
+Before requesting review from `.agents/reviewer.md`, the Frontend Expert must include:
+- Files changed.
+- User-facing behavior added or changed.
+- Component and hook responsibilities.
+- Validation and localStorage behavior.
+- Tests added or updated.
+- Exact test command executed.
+- Test result summary.
+- Localhost URL manually tested.
+- Browser and viewport coverage, including desktop and mobile.
+- Main buttons and controls clicked.
+- Key flows verified.
+- Screenshots or concise notes for important states.
+- Any UI or UX issues found and how they were fixed.
+- Confirmation that each UI fix was manually retested.
+- Any known limitations.
 
 ## Completion Rule
 After finishing a frontend task:
 1. Run relevant tests.
-2. Summarize the implementation.
-3. Summarize executed tests.
-4. Request review from the project-local Reviewer using `.agents/reviewer.md`.
+2. Run manual localhost UI verification.
+3. Fix and retest any UI or UX issues found.
+4. Summarize the implementation.
+5. Summarize automated test results.
+6. Summarize manual UI verification evidence.
+7. Request review from the project-local Reviewer using `.agents/reviewer.md`.
 
 If the Reviewer requests changes, apply them unless there is a strong technical reason not to. If you disagree with a recommendation, document the reason clearly and leave the decision for the human user.
