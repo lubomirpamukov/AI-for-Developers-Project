@@ -72,9 +72,9 @@
   grid-template-columns: minmax(320px, 0.88fr) minmax(360px, 1.12fr);
   gap: clamp(28px, 5vw, 76px);
   width: min(1180px, 100%);
-  min-height: calc(100vh - 118px);
   margin: 0 auto;
   align-items: center;
+  padding-block: clamp(44px, 7vh, 72px) clamp(18px, 4vh, 34px);
 }
 
 .copyColumn {
@@ -111,7 +111,7 @@
 
 .visualColumn {
   position: relative;
-  min-height: min(670px, 70vh);
+  min-height: min(560px, 62vh);
   isolation: isolate;
 }
 
@@ -133,8 +133,8 @@
 
 .heroImage {
   width: 100%;
-  height: min(670px, 70vh);
-  min-height: 420px;
+  height: min(560px, 62vh);
+  min-height: 360px;
   object-fit: cover;
   border-radius: 2px;
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
@@ -176,7 +176,7 @@
   z-index: 2;
   width: min(1180px, 100%);
   margin: 0 auto;
-  padding-block: clamp(34px, 6vw, 78px);
+  padding-block: clamp(12px, 2.5vw, 28px) clamp(34px, 6vw, 78px);
 }
 
 .deckRail {
